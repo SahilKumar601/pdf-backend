@@ -44,7 +44,7 @@ app.post('/text', async (req, res) => {
 });
 
 // to chat with the model
-app.post('chart', async (req, res) => {
+app.post('chat', async (req, res) => {
     const chat = model.startChat({
         history: req.body.history,
     })
