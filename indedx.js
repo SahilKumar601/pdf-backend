@@ -25,7 +25,7 @@ app.listen(port, () => {
 app.use('/auth',require('./routes/auth'))
 
 
-
+// to get summary of the text
 app.post('/text', async (req, res) => {
     if (!req.files && !req.files.pdfFile) {
         return res.status(400).send('No files were uploaded.');
@@ -40,5 +40,17 @@ app.post('/text', async (req, res) => {
      
     
     
+    res.send(text);
+});
+
+// to chat with the model
+app.post('chart', async (req, res) => {
+    const chat = model.startChat({
+        history: req.body.history,
+    })
+    const msg=req.body.message;
+    const result = await chat.sendMessage(msg);
+    const response = await result.response;
+    const text = response.text();
     res.send(text);
 });
