@@ -6,9 +6,11 @@ const jwt = require('jsonwebtoken');
 const User = require('../modles/user'); 
 const fetchuser = require('../middleware/fetchuser');
 
+const dotenv = require('dotenv');
 
 
-const jwt_secret = 'jacobgeorge'; 
+
+const jwt_secret = process.env.jwt_secret; 
 
 router.post('/register', [
   body('name', 'Enter a valid name').isLength({ min: 3 }),
