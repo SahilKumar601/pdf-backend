@@ -21,7 +21,7 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// app.use('/auth',require('./routes/auth'))
+app.use('/auth',require('./routes/auth'))
 
 
 // to get summary of the text
