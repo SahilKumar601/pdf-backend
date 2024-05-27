@@ -23,6 +23,7 @@ app.listen(port, () => {
 });
 
 app.use('/auth',require('./routes/auth'))
+app.use('/friend',require('./routes/friend'))
 
 
 // to get summary of the text
