@@ -18,6 +18,8 @@ const UserSchema =new Schema ({
     date:{
         type: Date,
         default: Date.now
-    }
+    },
+    friendRequests: [{ type: Schema.Types.ObjectId, ref: 'user' }],
+    friends: [{ type: Schema.Types.ObjectId, ref: 'user' }]
 });
 module.exports =mongoose.model('user',UserSchema);
