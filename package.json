@@ -1,10 +1,12 @@
 {
-  "name": "new-folder-(4)",
+  "name": "new-folder-4",
   "version": "1.0.0",
   "description": "",
   "main": "indedx.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,7 @@
     "express-validator": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.0",
+    "nodemon": "^3.1.1",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1"
   }

@@ -3,9 +3,10 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const pdfParse = require('pdf-parse');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const authRoutes = require("./routes/authRoutes");
 const dotenv = require("dotenv");
-const connect = require('./db');
-connect();
+const connectToDatabase = require("./config/database");
+connectToDatabase();
 dotenv.config();
 
 
@@ -14,55 +15,25 @@ const model = genAI.getGenerativeModel({ model: "gemini-pro"});
 const model2 = genAI.getGenerativeModel({ model: "gemini-pro-vision"});
 
 const app = express();
+app.use(express.json());
 app.use(cors());
-const port = 5000;
+const port = 4000;
 app.use(fileUpload());
 app.use("/",express.static('public'));
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-app.use('/auth',require('./routes/auth'))
-app.use('/friend',require('./routes/friend'))
+app.use('/api/v1', authRoutes);
+app.use('/api/v1/friend',require('./routes/friend'))
 
 
-// to get summary of the text
-// app.post('/text', async (req, res) => {
-//     if (!req.files && !req.files.pdfFile) {
-//         return res.status(400).send('No files were uploaded.');
-//     }
-//     console.log(req.files.pdfFile)
-//     const data = req.files.data
-//     // let  prompt = "briefly explain this \n";
-//     // prompt += data.text;
-//     // const result = await model.generateContent(prompt);
-//     // const response = result.response;
-//     const text = response.text();
-//     res.send(data);
-// });
-app.post('/detailedsummaries', async (req, res) => {
-    if (!req.files || !req.files.pdfFile) {
-        return res.status(400).send('No files were uploaded.');
-    }
-    const file = req.files.pdfFile; 
-    try {
-        const data = await pdfParse(file.data);
-        let prompt = "Provide a detailed and comprehensive explanation of the following text \n";
-        prompt += data.text;
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const text = response.text();
-        res.send(text);
-    } catch (error) {
-        console.error('Error processing PDF:', error);
-        res.status(500).send('Error processing PDF file.');
-    }
-});
 app.post('/quicksummarize', async (req, res) => {
     if (!req.files || !req.files.pdfFile) {
         return res.status(400).send('No files were uploaded.');
     }
     const file = req.files.pdfFile; 
+    console.log(file);
     try {
         const data = await pdfParse(file.data);
         let prompt = "Provide a detailed and comprehensive explanation of the following text \n";
@@ -70,10 +41,16 @@ app.post('/quicksummarize', async (req, res) => {
         const result = await model.generateContent(prompt);
         const response = result.response;
         const text = response.text();
-        res.send(text);
+        res.status(200).json({
+            success: true,
+            data: text
+        })
     } catch (error) {
         console.error('Error processing PDF:', error);
-        res.status(500).send('Error processing PDF file.');
+        res.status(500).json({
+            success: false,
+            error: error,
+        });
     }
 });
 app.post('/chat', async (req, res) => {
@@ -84,7 +61,11 @@ app.post('/chat', async (req, res) => {
     const result = await chat.sendMessage(msg);
     const response = await result.response;
     const text = response.text();
-    res.send(text);
+    // res.send(text);
+    res.status(200).json({
+        success: true,
+        data: text
+    })
 });
 
 
@@ -179,7 +160,11 @@ app.post('/upload', async (req, res) => {
             await fs.unlink(imgPath);
         }
 
-        res.send(allText);
+        // res.send(allText);
+        res.status(200).json({
+            success: true,
+            data: allText
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error processing PDF');
