@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
 
 
 
-const jwt_secret = process.env.jwt_secret; 
+const jwt_secret = process.env.jwtSecret; 
 
 router.post('/register', [
   body('name', 'Enter a valid name').isLength({ min: 3 }),
