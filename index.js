@@ -6,6 +6,12 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const authRoutes = require("./routes/authRoutes");
 const dotenv = require("dotenv");
 const connectToDatabase = require("./config/database");
+const { PDFDocument } = require('pdf-lib');
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs').promises;
+
+
 connectToDatabase();
 dotenv.config();
 
@@ -69,14 +75,6 @@ app.post('/chat', async (req, res) => {
 });
 
 
-
-
-const { PDFDocument } = require('pdf-lib');
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs').promises;
-
-
 const uploadsDir = path.join(__dirname, 'uploads');
 fs.mkdir(uploadsDir, { recursive: true }).catch(console.error);
 
@@ -121,7 +119,7 @@ const uploadImage = async (imgPath, i) => {
 
 
 // image summarization
-app.post('/upload', async (req, res) => {
+app.post('/detailSummarize', async (req, res) => {
     if (!req.files || !req.files.pdfFile) {
         return res.status(400).send('No file uploaded.');
     }
