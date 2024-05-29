@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
-const jwt_secret = process.env.jwt_secret; 
+const jwt_secret = process.env.jwtSecret; 
 
 
 const fetchuser =(req,res,next)=>{
