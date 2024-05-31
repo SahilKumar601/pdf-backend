@@ -1,28 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user'); 
+const User = require('../modles/user'); 
+
+
 
 
 router.post('/sendRequest', async (req, res) => {
-    const { userId, friendId } = req.body;
+    const { Uemail, Femail } = req.body;
 
     try {
-        const user = await User.findById(userId);
-        const friend = await User.findById(friendId);
+        const user = await User.findOne({ email: Uemail });
+        const friend = await User.findOne({ email: Femail });
 
         if (!user || !friend) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        if (friend.friendRequests.includes(userId)) {
+        if (friend.friendRequests.includes(Uemail)) {
             return res.status(400).json({ msg: 'Friend request already sent' });
         }
         if (user===friend){
             return res.status(400).json({ msg: 'You can not send friend request to yourself' });
 
         }
+        if (friend.friends.includes(Uemail)) {
+            return res.status(400).json({ msg: 'You are already friends' });
+        }
 
-        friend.friendRequests.push(userId);
+        friend.friendRequests.push(Uemail);
         await friend.save();
 
         res.status(200).json({ msg: 'Friend request sent' });
@@ -34,25 +39,25 @@ router.post('/sendRequest', async (req, res) => {
 
 
 router.post('/acceptRequest', async (req, res) => {
-    const { userId, friendId } = req.body;
+    const { Uemail, Femail } = req.body;
 
     try {
-        const user = await User.findById(userId);
-        const friend = await User.findById(friendId);
+        const user = await User.findOne({ email: Uemail });
+        const friend = await User.findOne({ email: Femail });
 
         if (!user || !friend) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        if (!user.friendRequests.includes(friendId)) {
+        if (!user.friendRequests.includes(Femail)) {
             return res.status(400).json({ msg: 'No friend request found' });
         }
 
-        user.friendRequests = user.friendRequests.filter(request => request.toString() !== friendId);
-        user.friends.push(friendId);
+        user.friendRequests = user.friendRequests.filter(request => request.toString() !== Femail);
+        user.friends.push(Femail);
         await user.save();
 
-        friend.friends.push(userId);
+        friend.friends.push(Uemail);
         await friend.save();
 
         res.status(200).json({ msg: 'Friend request accepted' });
@@ -64,20 +69,20 @@ router.post('/acceptRequest', async (req, res) => {
 
 
 router.post('/rejectRequest',async (req, res) => {
-    const { userId, friendId } = req.body;
+    const { Uemail, Femail } = req.body;
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.findOne({ email: Uemail });
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        if (!user.friendRequests.includes(friendId)) {
+        if (!user.friendRequests.includes(Femail)) {
             return res.status(400).json({ msg: 'Friend request not found' });
         }
 
-        user.friendRequests = user.friendRequests.filter(id => id.toString() !== friendId);
+        user.friendRequests = user.friendRequests.filter(id => id.toString() !== Femail);
         await user.save();
 
         res.status(200).json({ msg: 'Friend request rejected' });
@@ -90,10 +95,10 @@ router.post('/rejectRequest',async (req, res) => {
 
 
 router.post('/getFriendRequests',async (req, res) => {
-    const { userId } = req.body;
+    const { Uemail} = req.body;;
 
     try {
-        const user = await User.findById(userId).populate('friendRequests', 'name email');
+        const user = await User.findOne({ email: Uemail });
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
@@ -107,10 +112,10 @@ router.post('/getFriendRequests',async (req, res) => {
 });
 
 router.post('/getFriends',async (req, res) => {
-    const { userId } = req.body;
+    const { Uemail} = req.body;
 
     try {
-        const user = await User.findById(userId).populate('friends', 'name email');
+        const user = await User.findOne({ email: Uemail });
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
