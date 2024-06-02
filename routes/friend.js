@@ -18,7 +18,7 @@ router.post("/sendRequest", async (req, res) => {
         .status(400)
         .json({ success: false, msg: "Friend request already sent" });
     }
-    if (user === friend) {
+    if (Uemail === Femail) {
       return res.status(400).json({
         success: false,
         msg: "You can not send friend request to yourself",
@@ -124,8 +124,30 @@ router.post("/rejectRequest", async (req, res) => {
   }
 });
 
+async function getFriend(email) {
+  try {
+    let user = await User.findOne({ email: email });
+    return user;
+  } catch (error) {
+    console.error(error.message);
+    return null;
+  }
+}
+
+async function getFriends(emails) {
+  let friendsArray = [];
+
+  for (let i = 0; i < emails.length; i++) {
+    let friend = await getFriend(emails[i]);
+    friendsArray.push(friend);
+  }
+
+  return friendsArray;
+}
+
 router.post("/getFriendRequests", async (req, res) => {
   const { Uemail } = req.body;
+  let friendRequestsArray = [];
 
   try {
     const user = await User.findOne({ email: Uemail });
@@ -137,10 +159,14 @@ router.post("/getFriendRequests", async (req, res) => {
       });
     }
 
+    friendRequestsArray = await getFriends(user.friendRequests);
+
+    console.log(friendRequestsArray);
+
     res.status(200).json({
       success: true,
       msg: "Friend requests",
-      data: user.friendRequests,
+      data: friendRequestsArray,
     });
   } catch (error) {
     console.error(error.message);
@@ -154,6 +180,8 @@ router.post("/getFriendRequests", async (req, res) => {
 router.post("/getFriends", async (req, res) => {
   const { Uemail } = req.body;
 
+  let friendsArray = [];
+
   try {
     const user = await User.findOne({ email: Uemail });
 
@@ -164,10 +192,12 @@ router.post("/getFriends", async (req, res) => {
       });
     }
 
+    friendsArray = await getFriends(user.friends);
+
     res.status(200).json({
       success: true,
       msg: "Friends",
-      data: user.friends,
+      data: friendsArray,
     });
   } catch (error) {
     console.error(error.message);
@@ -182,18 +212,18 @@ router.post("/searchFriend", async (req, res) => {
   const { Femail } = req.body;
 
   try {
-    const user = await User.findOne({ Femail });
+    const user = await User.findOne({ email: Femail });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        msg: "Friend not found",
+        msg: "User not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      msg: "Friend found",
+      msg: "User found",
       data: user,
     });
   } catch (error) {
