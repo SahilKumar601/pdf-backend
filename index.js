@@ -207,10 +207,20 @@ app.get("/getSummarizedPdfByUserId", async (req, res) => {
     console.log(req.headers);
     const { userid } = req.headers;
     console.log(userid);
-    const summarizedPdfs = await SummarizedPdf.find({ createdBy: userid });
+    const summarizedPdfs = await User.findById(userid).populate(
+      "summarizedPDFs"
+    );
+
+    if (!summarizedPdfs) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      data: summarizedPdfs,
+      data: summarizedPdfs.summarizedPDFs,
     });
   } catch (error) {
     res.status(500).json({

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
+const mongoose = require('mongoose');
 
 router.post("/sendRequest", async (req, res) => {
   const { Uemail, Femail } = req.body;
@@ -225,6 +226,78 @@ router.post("/searchFriend", async (req, res) => {
       success: true,
       msg: "User found",
       data: user,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      success: false,
+      msg: "Server Error",
+    });
+  }
+});
+
+router.post("/sharePdf", async (req, res) => {
+  try {
+    const { Uemail, Femail, pdfId } = req.body;
+
+    console.log(Uemail, Femail, pdfId);
+
+    if (!Uemail || !Femail || !pdfId) {
+      return res.status(400).json({
+        success: false,
+        msg: "Please provide all the details",
+      });
+    }
+
+    var id = new mongoose.Types.ObjectId(pdfId);
+
+    console.log("Converted id: ", id);
+
+    if (Uemail === Femail) {
+      return res.status(400).json({
+        success: false,
+        msg: "You can not share pdf with yourself",
+      });
+    }
+
+    const user = await User.findOne({ email: Uemail });
+    const friend = await User.findOne({ email: Femail });
+
+    if (!user || !friend) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not found",
+      });
+    }
+
+    if (!user.summarizedPDFs.includes(id)) {
+      return res.status(400).json({
+        success: false,
+        msg: "Pdf not found",
+      });
+    }
+
+    if (!friend.friends.includes(Uemail)) {
+      return res.status(400).json({
+        success: false,
+        msg: "You are not friends",
+      });
+    }
+
+    if (friend.summarizedPDFs.includes(id)) {
+      return res.status(400).json({
+        success: false,
+        msg: "Pdf already shared",
+      });
+    }
+
+    friend.summarizedPDFs.push(id);
+
+    await friend.save();
+
+    res.status(200).json({
+      success: true,
+      msg: "Pdf shared",
     });
   } catch (error) {
     console.error(error.message);

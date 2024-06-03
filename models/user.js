@@ -20,6 +20,8 @@ const UserSchema =new Schema ({
         default: Date.now
     },
     friendRequests: [{ type: String , ref: 'email' }],
-    friends: [{ type: String , ref: 'email' }]
-});
+    friends: [{ type: String , ref: 'email' }],
+
+    summarizedPDFs: [{ type: Schema.Types.ObjectId, ref: 'summarizedPDF' }]
+}, {timestamps: true});
 module.exports =mongoose.model('user',UserSchema);
